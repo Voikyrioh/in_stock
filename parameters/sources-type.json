@@ -1,0 +1,20 @@
+{
+  "shops": {
+    "TopAchat": {
+      "name": "TopAchat",
+      "correspondingName": {
+        "inStock": "en-stock",
+        "noStock": "en-rupture"
+      },
+      "stockObjectClassname": "cart-box"
+    },
+    "LDLC": {
+      "name": "LDLC",
+      "correspondingName": {
+        "inStock": "stock-1",
+        "noStock": "stock-9"
+      },
+      "stockObjectClassname": "modal-stock-web"
+    }
+  }
+}

@@ -1,0 +1,17 @@
+{
+  "name": "in_stock",
+  "version": "1.0.0",
+  "description": "check item in stock on websites",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Voikyrioh",
+  "license": "ISC",
+  "devDependencies": {
+    "@types/node": "^14.14.21"
+  },
+  "dependencies": {
+    "htmlparser2": "^6.0.0"
+  }
+}
