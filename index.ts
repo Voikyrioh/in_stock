@@ -1,6 +1,7 @@
 import { getAllSourcesInformations } from "./SourcesService";
 
 const express = require('express');
+const cors = require('cors');
 const app = express();
 const environment = process.env;
 
@@ -15,6 +16,8 @@ const protocol = environment.PROTOCOL || 'http';
 if (protocol === 'https') {
     //TODO ssl and https managing
 } 
+
+app.use(cors());
 
 /*
 *  Get all sources informations route
