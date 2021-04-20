@@ -4,6 +4,8 @@
   "description": "check item in stock on websites",
   "main": "index.js",
   "scripts": {
+    "build": "tsc index.ts --outDir build/",
+    "dev": "PORT=8080 HOST='localhost' PROTOCOLE='http' node build/index.js ",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "Voikyrioh",

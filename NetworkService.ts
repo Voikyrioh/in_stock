@@ -76,7 +76,7 @@ export async function getSources(): Promise<StockSource[]> {
         return sources as StockSource[];
 
     } catch (err) {
-        console.error(err);
+        throw err;
     }
     return null;
 }
