@@ -12,6 +12,7 @@
     "@types/node": "^14.14.21"
   },
   "dependencies": {
+    "express": "^4.17.1",
     "htmlparser2": "^6.0.0"
   }
 }
