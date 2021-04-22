@@ -1,4 +1,4 @@
-import { getAllSourcesInformations } from "./SourcesService";
+import { getAllProductInformation } from "./Services/ProductService";
 
 const express = require('express');
 const cors = require('cors');
@@ -22,10 +22,11 @@ app.use(cors());
 /*
 *  Get all sources informations route
 * */
-app.get('/sources/', (req, res) => {
-    getAllSourcesInformations().then(value => {
+app.get('/products/', (req, res) => {
+    getAllProductInformation().then(value => {
         res.send(value);
     }).catch(err => {
+        console.error(err);
         res.sendStatus(500);
     })
 })

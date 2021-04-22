@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "build": "tsc index.ts --outDir build/",
-    "dev": "PORT=8080 HOST='localhost' PROTOCOLE='http' node build/index.js ",
+    "dev": "PORT=8081 HOST='localhost' PROTOCOLE='http' node build/index.js ",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "Voikyrioh",
@@ -14,6 +14,7 @@
     "@types/node": "^14.14.21"
   },
   "dependencies": {
+    "bcrypt": "^5.0.1",
     "cors": "^2.8.5",
     "express": "^4.17.1",
     "htmlparser2": "^6.0.0",
