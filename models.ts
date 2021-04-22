@@ -12,3 +12,10 @@ export interface StockSource {
     name: string;
     url: string;
 }
+
+export interface StockSourceInformations {
+    shop: string;
+    name: string;
+    url: string;
+    status?: string;
+}

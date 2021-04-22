@@ -1,56 +1,35 @@
-import {getSources, getWebpageInfoFromURL} from "./NetworkService"
-import {StockSource} from "./models";
+import { getAllSourcesInformations } from "./SourcesService";
 
-const colors = {
-    black: "\x1b[30m",
-    red: "\x1b[31m",
-    green: "\x1b[32m",
-    yellow: "\x1b[33m",
-    blue: "\x1b[34m",
-    magenta: "\x1b[35m",
-    cyan: "\x1b[36m",
-    white: "\x1b[37m"
+const express = require('express');
+const cors = require('cors');
+const app = express();
+const environment = process.env;
+
+if (!environment.HOST || !environment.PORT) {
+    throw new Error("Error : Host and/or port need to be specified");
 }
 
-const stockColorcode = {
-    "inStock": "green",
-    "noStock": "red",
-    "supply": "yellow",
-    "null": "yellow"
-}
+const host = environment.HOST;
+const port = environment.PORT;
+const protocol = environment.PROTOCOL || 'http';
 
-const correspondingNames = {
-    "inStock": "En stock !",
-    "noStock": "En rupture",
-    "supply": "Bientôt en stock",
-    "null": "IDK !"
-}
+if (protocol === 'https') {
+    //TODO ssl and https managing
+} 
 
-function showInfoStatus(source: StockSource, classlist: string[]) {
-    let stockState = "null";
+app.use(cors());
 
-    for (let status in source.shop.correspondingName) {
-        if (classlist.includes(source.shop.correspondingName[status])) {
-            stockState = status;
-        }
-    }
+/*
+*  Get all sources informations route
+* */
+app.get('/sources/', (req, res) => {
+    getAllSourcesInformations().then(value => {
+        res.send(value);
+    }).catch(err => {
+        res.sendStatus(500);
+    })
+})
 
-    console.log(`\x1b[1m${colors.cyan}[${source.shop.name}]${colors.white} - ${source.name} : ${colors[stockColorcode[stockState]]}${correspondingNames[stockState]}`)
-}
-
-function check(source: StockSource) {
-
-    getWebpageInfoFromURL(source.url, source.shop.stockObjectClassname)
-        .then(urlDocument => {
-            showInfoStatus(source, urlDocument.split(' '));
-        })
-        .catch(error => {
-            console.error(error)
-        })
-}
-
-getSources().then(sources => {
-    for (let source of sources) {
-        check(source);
-    }
+app.listen(port, () => {
+    console.log(`[Info] API Started on ${protocol}://${host}:${port}`);
 })
