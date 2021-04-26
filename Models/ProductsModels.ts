@@ -7,7 +7,7 @@ export interface FullProduct {
 }
 
 export interface ProductInformations {
-    shop: string;
+    source: string;
     name: string;
     url: string;
     status?: string;
@@ -15,7 +15,7 @@ export interface ProductInformations {
 
 export interface ProductAttributes {
     id: number;
-    source: string;
+    source: number;
     name: string;
     url: string;
 }

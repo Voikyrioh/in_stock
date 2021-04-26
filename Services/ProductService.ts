@@ -1,7 +1,7 @@
 import {FullProduct, ProductAttributes, ProductInformations} from "../Models/ProductsModels";
 import { getWebpageInfoFromURL } from "./NetworkService";
-import * as fs from "fs";
 import {getAllSources} from "./SourceService";
+import databaseInstance from "./MysqlService";
 
 function getSourceStatus(source: FullProduct, classlist: string[]) {
     let stockState = "null";
@@ -15,16 +15,17 @@ function getSourceStatus(source: FullProduct, classlist: string[]) {
     return stockState;
 }
 
-function getAllProducts(): ProductAttributes[] {
-    return require('../Configuration/sources.json') as ProductAttributes[];
+function getAllProducts(): Promise<ProductAttributes[]> {
+    const query = `SELECT * FROM products;`;
+    return databaseInstance.query<ProductAttributes>(query);
 }
 
 export async function getAllFullProducts(): Promise<FullProduct[]> {
     try {
-        const products = getAllProducts();
-        const sources = getAllSources();
+        const products = await getAllProducts();
+        const sources = await getAllSources();
         const fullProducts: FullProduct[] = []
-
+        
         if (!products || products.length === 0) {
             console.error("No sources found in sources file.");
             return;
@@ -32,7 +33,7 @@ export async function getAllFullProducts(): Promise<FullProduct[]> {
 
         for (let product of products) {
             for (let source of sources) {
-                if (product.source === source.name) {
+                if (product.source === source.id) {
                     fullProducts.push({
                        name: product.name,
                        source: source,
@@ -50,10 +51,10 @@ export async function getAllFullProducts(): Promise<FullProduct[]> {
 
 function sourceValidate(source: FullProduct): Promise<ProductInformations> {
     return new Promise<ProductInformations>((resolve, reject) => {
-        getWebpageInfoFromURL(source.url, source.source.stockObjectClassname)
+        getWebpageInfoFromURL(source.url, source.source.queryStockSelector)
         .then(urlDocument => {
             resolve({
-                shop: source.source.name,
+                source: source.source.name,
                 name: source.name,
                 url: source.url,
                 status: getSourceStatus(source, urlDocument.split(' '))
