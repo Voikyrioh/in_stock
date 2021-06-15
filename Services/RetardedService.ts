@@ -4,11 +4,16 @@ import {verifyPassword} from "./SecurityService";
 
 export async function authRetarded(username: string, password: string): Promise<RetardedAttribute> {
     const user = await databaseInstance.query<RetardedAttribute>('SELECT * FROM retardeds WHERE username = ?', [username]);
+
+    if (!user || user.length < 1) {
+        throw "USER_DOES_NOT_EXIST";
+    }
+    
     if (await verifyPassword(user[0].password, user[0].salt, password)) {
         return user[0]
     }
-    
-    return null;
+
+    return null;   
 }
 
 export async function getRetardedById(id: number): Promise<RetardedAttribute> {

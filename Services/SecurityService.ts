@@ -102,6 +102,7 @@ export function authenticate(req, res, next) {
             return;
         }
         res.role = auth.role
+        res.userId = auth.id
         next();
     }, reason => {
         res.status(401);

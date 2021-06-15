@@ -14,3 +14,12 @@ export async function getAllSources(): Promise<Source[]> {
     const query = `SELECT * FROM sources;`;
     return convertSourceAttributes(await databaseInstance.query<SourceAttributes>(query));
 }
+
+export async function getProductSource(id): Promise<Source> {
+    const query = `SELECT * FROM sources WHERE id = ?;`;
+    const productSource = await databaseInstance.query<SourceAttributes>(query, [id]);
+    if (!productSource || productSource.length < 1) {
+        throw 'Not found';
+    }
+    return convertSourceAttributes(productSource)[0];
+}

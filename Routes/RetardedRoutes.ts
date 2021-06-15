@@ -13,7 +13,17 @@ router.get('/user/:id', authenticate, (req, res) => {
 })
 
 router.post('/user/update', authenticate, (req, res) => {
+    
+})
 
+router.post('/user/role/update', authenticate, (req, res) => {
+    if(!checkRequiredBodyFields(req, res, ["id", "role"])) {
+        return;
+    }
+
+    if(!checkRequiredBodyFields(req, res, ["id", "role"])) {
+        return;
+    }
 })
 
 router.post('/logout', authenticate, (req, res) => {
@@ -91,7 +101,14 @@ router.post('/login', (req, res) => {
         
         res.cookie('jwt', generateAccessToken(auth.id, auth.role), {expires: expireDate});
         res.send({expiresIn: 3600, role: auth.role});
+    }).catch( error => {
+        if (error === 'USER_DOES_NOT_EXIST') {
+            res.sendStatus(404);
+        } else {
+            res.sendStatus(500)
+        }
     });
+    
     return;
 });
     

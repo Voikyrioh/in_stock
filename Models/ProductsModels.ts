@@ -19,3 +19,13 @@ export interface ProductAttributes {
     name: string;
     url: string;
 }
+
+export interface UserProductInformations {
+    id: number;
+    source: string;
+    name: string;
+    url: string;
+    status?: string;
+    dailyCheck?: boolean;
+    alerts?: boolean;
+}
