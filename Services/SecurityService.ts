@@ -23,7 +23,7 @@ export function generateAccessToken(retardId, retardRoles): string {
 export function getCookies(cookies: string): {name: string, value: string}[] {
     return cookies?.split(';')?.map(cookie => {
         const cookieTab = cookie.split('=');
-        return {name: cookieTab[0], value: cookieTab[1]}
+        return {name: cookieTab[0].trim(), value: cookieTab[1]}
     });
 }
 
@@ -94,8 +94,8 @@ export function authenticate(req, res, next) {
         return;
     }
     
-    const jwtCookie =  getCookies(req.headers.cookie)?.find(cookie => cookie.name === 'jwt');
-    authenticateAccessToken(jwtCookie.value).then(auth => {
+    const jwtCookie = getCookies(req.headers.cookie)?.find(cookie => cookie.name === 'jwt');
+    authenticateAccessToken(jwtCookie?.value).then(auth => {
         if (!auth) {
             res.status(400);
             res.send('incorrect token');
@@ -111,7 +111,7 @@ export function authenticate(req, res, next) {
     })
 }
 
-export const Roles = ['RETARDED','MORONSTRATOR','ADMINIDIOT'];
+export const Roles = ['RETARDED','MORONDERATOR','ADMINIDIOT'];
 
 export function checkRoles(res, role): boolean {
     if (!res.role || !Roles.includes(res.role)) {
