@@ -1,4 +1,6 @@
-export interface RetardedAttribute {
+import {TableAttribute} from "../build/Models/DatabaseModels";
+
+export interface RetardedAttribute extends TableAttribute {
     id: number;
     username: string;
     password: string;
@@ -12,7 +14,7 @@ export interface RetardedAttribute {
 export interface RetardedInfo {
     id: number;
     username: string;
-    roles: string[];
+    role: string;
     email?: string;
     firstname?: string;
     lastname?: string;

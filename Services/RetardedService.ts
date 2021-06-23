@@ -1,6 +1,7 @@
 import {RetardedAttribute} from "../Models/RetardedModels";
 import databaseInstance from "./MysqlService";
 import {verifyPassword} from "./SecurityService";
+import {Tables} from "../build/Models/DatabaseModels";
 
 export async function authRetarded(username: string, password: string): Promise<RetardedAttribute> {
     const user = await databaseInstance.query<RetardedAttribute>('SELECT * FROM retardeds WHERE username = ?', [username]);
@@ -33,4 +34,8 @@ export async function createRetarded(retarded: RetardedAttribute): Promise<numbe
     VALUES 
         (NULL, ?, ?, ?, ?, ?, ?, ?)
     `, [retarded.username, retarded.password, retarded.salt, retarded.role, retarded.email, retarded.firstname || 'NULL', retarded.lastname || 'NULL']);
+}
+
+export async function updateRetarded(retarded: RetardedAttribute): Promise<number[]> {
+    return databaseInstance.updateOne<RetardedAttribute>(Tables.RETARDEDS, retarded);
 }

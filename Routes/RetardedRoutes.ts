@@ -1,19 +1,92 @@
-import {authRetarded, createRetarded, getRetardedByUsername} from "../Services/RetardedService";
+import {
+    authRetarded,
+    createRetarded,
+    getRetardedById,
+    getRetardedByUsername,
+    updateRetarded
+} from "../Services/RetardedService";
 import {
     authenticate,
     checkPasswordSecurity,
-    checkRequiredBodyFields,
+    checkRequiredBodyFields, checkRoles,
     generateAccessToken, hashPassword
 } from "../Services/SecurityService";
+import {RetardedAttribute, RetardedInfo} from "../Models/RetardedModels";
 
 const router = require('express').Router();
 
 router.get('/user/:id', authenticate, (req, res) => {
+    const userId = Number.parseInt(req.params.id, 10);
 
+    if (!userId || Number.isNaN(userId)) {
+        res.sendStatus(400);
+        return;
+    }
+
+    if (userId !== res.userId && (!res.role || res.role !== 'ADMINIDIOT')) {
+        res.sendStatus(403);
+        return;
+    }
+
+    getRetardedById(userId).then((user) => {
+       if (!user) {
+           res.sendStatus(404);
+           return;
+       }
+
+       const anoUser: RetardedInfo = {
+           id: user.id,
+           username: user.username,
+           role: user.role,
+           email: user.email,
+           firstname: user.firstname,
+           lastname: user.lastname
+       }
+       res.send(anoUser);
+    });
 })
 
 router.post('/user/update', authenticate, (req, res) => {
-    
+    const requestUser = req.body;
+
+    if (requestUser.id !== res.userId && (!res.role || res.role !== 'ADMINIDIOT')) {
+        res.sendStatus(403);
+        return;
+    }
+
+    getRetardedById(requestUser.id).then(async (user) => {
+        if (!user) {
+            res.sendStatus(404);
+            return;
+        }
+
+        // If user decide to change username, check if new username is already in use
+        if (user.username !== requestUser.username) {
+            if (await getRetardedByUsername(requestUser.username)) {
+                res.sendStatus(400);
+                return;
+            }
+        }
+
+        const updateUser: RetardedAttribute = { ...user, ...requestUser };
+
+        updateRetarded(updateUser).then(updateResult => {
+            console.log(updateResult);
+            getRetardedById(updateUser.id).then(updatedUser => {
+                res.send({
+                    id: updatedUser.id,
+                    username: updatedUser.username,
+                    role: updatedUser.role,
+                    email: updatedUser.email,
+                    firstname: updatedUser.firstname,
+                    lastname: updatedUser.lastname
+                });
+            })
+        }).catch(error => {
+            console.error(error);
+            res.sendStatus(500);
+        })
+    });
 })
 
 router.post('/user/role/update', authenticate, (req, res) => {

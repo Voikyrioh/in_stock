@@ -1,4 +1,5 @@
 import {ResultSetHeader} from "mysql2";
+import {Tables, TableAttribute} from "../build/Models/DatabaseModels";
 
 class MysqlConnexion {
     private static mysql = require('mysql2/promise')
@@ -31,8 +32,31 @@ class MysqlConnexion {
             }
         });
     }
-    
-    
+
+
+    updateOne<T extends TableAttribute>(table: Tables, tableAttribute: T): Promise<number[]> {
+        return new Promise(async (resolve, reject) => {
+            const fields = [];
+            const replacements = [];
+
+            for (const attribute in tableAttribute) {
+                if (tableAttribute.hasOwnProperty(attribute) && attribute!== null) {
+                    fields.push(`${attribute}="${tableAttribute[attribute]}"`);
+                    replacements.push(tableAttribute[attribute]);
+                }
+            }
+            replacements.push(tableAttribute.id);
+
+            const query = `UPDATE ${table} SET ${fields.join(',')} WHERE id = ?`;
+
+            try {
+                let response: ResultSetHeader[] = await this.databaseConnexion.query(query, replacements);
+                resolve(response.map(row => row?.insertId));
+            } catch (e) {
+                reject(e);
+            }
+        });
+    }
 }
 
 const databaseInstance = new MysqlConnexion();
