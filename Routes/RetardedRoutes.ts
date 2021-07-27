@@ -146,7 +146,7 @@ router.put('/signup', async (req, res) => {
             expireDate.setSeconds(3600);
         
             res.cookie('jwt', generateAccessToken(newRetarded.id, newRetarded.role), {expires: expireDate});
-            res.send({expiresIn: 3600, role: newRetarded.role});
+            res.send({expiresIn: 3600, user: {username: newRetarded.username, role: newRetarded.role}});
                 
         }).catch(error => {
             console.error(error);
