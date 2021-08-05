@@ -1,6 +1,7 @@
 import {
     authRetarded,
     createRetarded,
+    getAllRetardeds,
     getRetardedById,
     getRetardedByUsername,
     updateRetarded
@@ -9,11 +10,25 @@ import {
     authenticate,
     checkPasswordSecurity,
     checkRequiredBodyFields, checkRoles,
-    generateAccessToken, hashPassword
+    generateAccessToken, hashPassword, Roles
 } from "../Services/SecurityService";
 import {RetardedAttribute, RetardedInfo} from "../Models/RetardedModels";
 
 const router = require('express').Router();
+
+router.get('/users/', authenticate, (req, res) => {
+   if (!checkRoles(res, Roles[2])) {
+       res.status(401);
+       res.send();
+       return;
+   }
+
+   getAllRetardeds().then(retardeds => {
+       res.send(retardeds);
+   }).catch(error => {
+       res.sendStatus(500);
+   })
+});
 
 router.get('/user/:id', authenticate, (req, res) => {
     const userId = Number.parseInt(req.params.id, 10);
@@ -108,13 +123,13 @@ router.put('/signup', async (req, res) => {
     if(!checkRequiredBodyFields(req, res, ["username", "password", "email"])) {
         return;
     }
-    
+
     if (await getRetardedByUsername(req.body.username)) {
         res.status(400);
         res.send('username already exist')
         return;
     }
-    
+
     const passwordCheck = checkPasswordSecurity(req.body.password);
     if (passwordCheck) {
         res.status(400);
@@ -134,20 +149,20 @@ router.put('/signup', async (req, res) => {
             firstname: req.body.firstname,
             lastname: req.body.lastname,
         }
-        
+
         createRetarded(newRetarded).then(id => {
             if (!id[0]) {
                 res.sendStatus(500);
                 return;
             }
             newRetarded.id = id[0];
-            
+
             const expireDate = new Date();
             expireDate.setSeconds(3600);
-        
+
             res.cookie('jwt', generateAccessToken(newRetarded.id, newRetarded.role), {expires: expireDate});
             res.send({expiresIn: 3600, user: {username: newRetarded.username, role: newRetarded.role}});
-                
+
         }).catch(error => {
             console.error(error);
             res.sendStatus(500);
@@ -162,7 +177,7 @@ router.post('/login', (req, res) => {
     if(!checkRequiredBodyFields(req, res, ["username", "password"])) {
         return;
     }
-    
+
     authRetarded(req?.body?.username, req?.body?.password).then(auth => {
         if (!auth) {
             res.sendStatus(404);
@@ -171,7 +186,7 @@ router.post('/login', (req, res) => {
 
         const expireDate = new Date();
         expireDate.setSeconds(3600);
-        
+
         res.cookie('jwt', generateAccessToken(auth.id, auth.role), {expires: expireDate});
         res.send({expiresIn: 3600, user: {username: auth.username, role: auth.role}});
     }).catch( error => {
@@ -181,8 +196,8 @@ router.post('/login', (req, res) => {
             res.sendStatus(500)
         }
     });
-    
+
     return;
 });
-    
+
 module.exports = router;

@@ -1,12 +1,14 @@
 import {Source} from "./SourcesModels";
 
 export interface FullProduct {
+    key: string;
     source: Source;
     name: string;
     url: string;
 }
 
 export interface ProductInformations {
+    key: string;
     source: string;
     name: string;
     url: string;
