@@ -61,7 +61,7 @@ router.get('/user/:id', authenticate, (req, res) => {
     });
 })
 
-router.post('/user/update', authenticate, (req, res) => {
+router.put('/user/update', authenticate, (req, res) => {
     const requestUser = req.body;
 
     if (requestUser.id !== res.userId && (!res.role || res.role !== 'ADMINIDIOT')) {
@@ -83,10 +83,21 @@ router.post('/user/update', authenticate, (req, res) => {
             }
         }
 
+        if (requestUser.password) {
+            if (checkPasswordSecurity(requestUser.password)) {
+                res.status(400);
+                res.statusMessage = checkPasswordSecurity(requestUser.password);
+                res.send();
+                return;
+            }
+            const newPassword = await hashPassword(requestUser.password);
+            requestUser.password = newPassword.hash;
+            requestUser.salt = newPassword.salt;
+        }
+
         const updateUser: RetardedAttribute = { ...user, ...requestUser };
 
         updateRetarded(updateUser).then(updateResult => {
-            console.log(updateResult);
             getRetardedById(updateUser.id).then(updatedUser => {
                 res.send({
                     id: updatedUser.id,
