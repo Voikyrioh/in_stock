@@ -34,12 +34,7 @@ export async function getRetardedByUsername(username: string): Promise<RetardedA
 }
 
 export async function createRetarded(retarded: RetardedAttribute): Promise<number[]> {
-    return databaseInstance.insert(`
-    INSERT INTO 
-        retardeds (id, username, password, salt, role, email, firstname, lastname) 
-    VALUES 
-        (NULL, ?, ?, ?, ?, ?, ?, ?)
-    `, [retarded.username, retarded.password, retarded.salt, retarded.role, retarded.email, retarded.firstname || 'NULL', retarded.lastname || 'NULL']);
+    return databaseInstance.insert(Tables.RETARDEDS, retarded);
 }
 
 export async function updateRetarded(retarded: RetardedAttribute): Promise<number[]> {
