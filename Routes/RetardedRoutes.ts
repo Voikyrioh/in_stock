@@ -172,7 +172,7 @@ router.put('/signup', async (req, res) => {
             expireDate.setSeconds(3600);
 
             res.cookie('jwt', generateAccessToken(newRetarded.id, newRetarded.role), {expires: expireDate});
-            res.send({expiresIn: 3600, user: {username: newRetarded.username, role: newRetarded.role}});
+            res.send({expiresIn: 3600, user: {id: newRetarded.id , username: newRetarded.username, role: newRetarded.role}});
 
         }).catch(error => {
             console.error(error);
@@ -199,7 +199,7 @@ router.post('/login', (req, res) => {
         expireDate.setSeconds(3600);
 
         res.cookie('jwt', generateAccessToken(auth.id, auth.role), {expires: expireDate});
-        res.send({expiresIn: 3600, user: {username: auth.username, role: auth.role}});
+        res.send({expiresIn: 3600, user: {id: auth.id, username: auth.username, role: auth.role}});
     }).catch( error => {
         if (error === 'USER_DOES_NOT_EXIST') {
             res.sendStatus(404);

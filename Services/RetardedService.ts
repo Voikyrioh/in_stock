@@ -1,7 +1,7 @@
 import {RetardedAttribute} from "../Models/RetardedModels";
 import databaseInstance from "./MysqlService";
 import {verifyPassword} from "./SecurityService";
-import {Tables} from "../build/Models/DatabaseModels";
+import {Tables} from "../Models/DatabaseModels";
 
 export async function authRetarded(username: string, password: string): Promise<RetardedAttribute> {
     const user = await databaseInstance.query<RetardedAttribute>('SELECT * FROM retardeds WHERE username = ?', [username]);
