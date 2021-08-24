@@ -49,6 +49,7 @@ class MysqlConnexion {
             }
         });
     }
+
     updateOne<T extends TableAttribute>(table: Tables, tableAttribute: T): Promise<number[]> {
         return new Promise(async (resolve, reject) => {
             const [fields, replacements, id] = MysqlConnexion.getFieldAndAttributes(table, tableAttribute);

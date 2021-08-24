@@ -118,6 +118,41 @@ export async function getUserProduct(userid: number, id: number): Promise<UserPr
     });
 }
 
+export async function getAllUserProducts(userid: number): Promise<UserProductInformations[]> {
+    return new Promise<UserProductInformations[]>((resolve, reject) => {
+        const query = `SELECT
+                p.id as 'id',
+                p.source as 'source',
+                IFNULL(rp.custom_name, p.name) as 'name',
+                p.url as 'url',
+                rp.daily_check as 'dailyCheck',
+                rp.alerts as 'alerts'
+            FROM retardeds_products AS rp
+            INNER JOIN products AS p ON rp.product_id = p.id
+            WHERE rp.retarded_id = ?;`;
+
+        databaseInstance.query<UserProductInformations>(query, [userid.toString(10)]).then(async (userProductList) => {
+            if (!userProductList && userProductList.length < 1) {
+                resolve([]);
+                return;
+            }
+            resolve(await Promise.all(userProductList.map(async (userProduct) => {
+                try {
+                    const productSource: Source = await getProductSource(userProduct.source);
+                    const urlDocument = await getWebpageInfoFromURL(userProduct.url, productSource.queryStockSelector);
+
+                    return {
+                        ...userProduct,
+                        source: productSource.name,
+                        status: getSourceStatus(productSource, urlDocument.split(' '))};
+                } catch (error) {
+                    reject(error);
+                }
+            })));
+        });
+    });
+}
+
 export function getAllProductInformation(): Promise<ProductInformations[]> {
     return new Promise<ProductInformations[]>((resolve, reject) => {
         const sourcesInformation = [];
