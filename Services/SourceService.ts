@@ -23,3 +23,4 @@ export async function getProductSource(id): Promise<Source> {
     }
     return convertSourceAttributes(productSource)[0];
 }
+

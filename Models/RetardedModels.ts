@@ -19,3 +19,9 @@ export interface RetardedInfo {
     firstname?: string;
     lastname?: string;
 }
+
+export const AcceptedProfilePictureExtensions = [
+    'image/jpg',
+    'image/jpeg',
+    'image/png',
+]

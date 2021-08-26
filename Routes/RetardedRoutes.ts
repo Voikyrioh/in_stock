@@ -12,7 +12,9 @@ import {
     checkRequiredBodyFields, checkRoles,
     generateAccessToken, hashPassword, Roles
 } from "../Services/SecurityService";
-import {RetardedAttribute, RetardedInfo} from "../Models/RetardedModels";
+import {AcceptedProfilePictureExtensions, RetardedAttribute, RetardedInfo} from "../Models/RetardedModels";
+import * as fs from 'fs';
+import * as path from 'path';
 
 const router = require('express').Router();
 
@@ -64,7 +66,7 @@ router.get('/user/:id', authenticate, (req, res) => {
 router.put('/user/update', authenticate, (req, res) => {
     const requestUser = req.body;
 
-    if (requestUser.id !== res.userId && (!res.role || res.role !== 'ADMINIDIOT')) {
+    if (requestUser.id !== res.userId && (res.role !== 'ADMINIDIOT')) {
         res.sendStatus(403);
         return;
     }
@@ -183,6 +185,58 @@ router.put('/signup', async (req, res) => {
         res.sendStatus(500);
     }
 })
+
+router.post('/file/profile-picture/self', authenticate, async (req, res) => {
+    req.accepts(AcceptedProfilePictureExtensions);
+
+    const newProfilePicture = await new Promise<Uint8Array>(resolve => {
+        let fileData;
+        req.on("data", (data: Buffer) => {
+            fileData = !fileData ? data.buffer: fileData + data.buffer;
+        })
+        req.on("end", () => {
+            resolve(new Uint8Array(fileData))
+        })
+    });
+
+    console.log(newProfilePicture);
+
+
+    const ppUser = await getRetardedById(res.userId);
+    if (!ppUser) {
+        res.sendStatus(404);
+        return;
+    }
+
+    let newProfilePictureExtension = req.headers["content-type"]?.split('/')[1];
+
+
+    const assetsDirPath = path.join(__dirname, '..', process.env.ASSETS_FOLDER ?? 'assets');
+    if(!fs.existsSync(assetsDirPath)) {
+        res.sendStatus(500);
+        throw new Error('Assets dir does not exist !');
+    }
+
+    const profilePicturesFolderPath = path.join(assetsDirPath, 'profile_pictures');
+    if (!fs.existsSync(profilePicturesFolderPath)) {
+        fs.mkdirSync(profilePicturesFolderPath);
+    }
+
+    const userPPPath = profilePicturesFolderPath + '/' + ppUser.id.toString(10) + '.';
+    for (const ext of AcceptedProfilePictureExtensions.map(e => e.split('/')[1])) {
+        if (fs.existsSync(userPPPath + ext)) {
+            fs.unlinkSync(userPPPath + ext);
+        }
+    }
+
+    fs.writeFileSync(userPPPath + newProfilePictureExtension, newProfilePicture);
+
+    if (fs.existsSync(userPPPath + newProfilePictureExtension)) {
+        res.sendStatus(200);
+    } else {
+        res.sendStatus(500);
+    }
+});
 
 router.post('/login', (req, res) => {
     if(!checkRequiredBodyFields(req, res, ["username", "password"])) {

@@ -9,11 +9,15 @@ if (!environment.RETARDED_DATABASE_PASSWORD || !environment.RETARDED_DATABASE_US
     throw new Error("[FATAL] Global vars 'RETARDED_DATABASE_PASSWORD', 'RETARDED_DATABASE_USERNAME', 'RETARDED_DATABASE_HOST' are needed");
 }
 
-// parse application/x-www-form-urlencoded
-app.use(bodyParser.urlencoded({ extended: false }))
 
 // parse application/json
-app.use(bodyParser.json())
+app.use((req, res, next) => {
+    if(req.url.match(/.*(\/file\/).*/)) {
+        next();
+    } else {
+        bodyParser.json()(req, res, next);
+    }
+});
 
 databaseInstance.connectDatabase({
     host: environment.RETARDED_DATABASE_HOST,
