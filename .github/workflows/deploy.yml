@@ -1,0 +1,32 @@
+# Deploy: builds the image from the current commit, pushes it to GHCR (tags: short
+# SHA + latest), writes the .env from Vault (secret/apps/in-stock) and runs
+# `docker compose up` on the server. Reusable workflow of voikyrioh/workflows.
+#
+# Prerequisite: the infra workflow provision-app.yml (app_name=in-stock) has run
+# once. It creates /opt/infra/apps/in-stock, the database, the Vault secret, and
+# sets the secrets this workflow needs on this repository (SSH_*, VAULT_*, GHCR_TOKEN).
+#
+# Manual for now. For continuous deployment on every merge to main, add:
+#   push:
+#     branches: [main]
+name: Deploy
+
+on:
+  workflow_dispatch:
+
+concurrency:
+  group: deploy-in-stock
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+  packages: write
+
+jobs:
+  deploy:
+    uses: voikyrioh/workflows/.github/workflows/deploy-app.yml@main
+    with:
+      # app_name = folder /opt/infra/apps/<name> = apps/<name>.yml in the infra repo
+      app_name: in-stock
+      image_name: in-stock
+    secrets: inherit
