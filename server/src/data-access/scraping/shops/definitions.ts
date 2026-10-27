@@ -7,10 +7,10 @@ import type { ProductSelectors } from '../extract/product-page'
  * selectors are only a fallback. Search pages use `listing`, then JSON-LD
  * ItemList, then links matching `productUrlPattern`.
  *
- * ⚠️ Search URLs and card selectors were written from the shops' known layouts
- * without network access to them (cloud dev environment). Check each shop from
- * the server with `npm run probe -- <id> "rtx 4070"` (ticket STK-15) and fix
- * here: the probe prints which strategy found what.
+ * Checked with the « Probe shops » workflow on 2026-10-27 (STK-15, state in
+ * docs/runbooks/sonder-les-boutiques.md). When a shop changes its layout, run
+ * `npm run probe -- <id> "rtx 4070"` and fix here: the probe prints which
+ * strategy found what, the card structure and the home page search forms.
  */
 export interface ShopDefinition {
 	id: string
@@ -105,11 +105,14 @@ export const SHOPS: ShopDefinition[] = [
 		hosts: ['www.grosbill.com', 'grosbill.com'],
 		searchUrl: (q) => `https://www.grosbill.com/recherche?q=${enc(q)}`,
 		productUrlPattern: GROSBILL_CYBERTEK_PRODUCT,
+		// Web stock only: the card also shows store availability ("Non dispo en magasin").
 		listing: {
-			item: '.grb__liste-produit__liste__produit, .listing_produit, [class*="produit-item"]',
-			title: '.grb__liste-produit__liste__produit__information__libelle, h2, .titre',
-			price: '[class*="prix"], .price',
-			stock: '[class*="dispo"], [class*="stock"]',
+			item: 'article.product-row',
+			link: 'a.p-name',
+			title: 'a.p-name',
+			price: '.price-main',
+			stock: '.dw-block .dw-status',
+			image: '.pimg-zone img',
 		},
 	},
 	{
@@ -138,10 +141,11 @@ export const SHOPS: ShopDefinition[] = [
 		searchUrl: (q) => `https://www.cybertek.fr/recherche?q=${enc(q)}`,
 		productUrlPattern: GROSBILL_CYBERTEK_PRODUCT,
 		listing: {
-			item: '.listing_produit .produit, .product-item, [class*="ProductCard"]',
-			title: '.nom_produit, .product-name, h2',
-			price: '.prix_produit, .price',
-			stock: '[class*="stock"], [class*="dispo"]',
+			item: 'article.card',
+			link: 'a.card-name',
+			title: 'a.card-name',
+			price: '.card-price .price, .card-price',
+			image: '.card-img img',
 		},
 	},
 	{
@@ -153,12 +157,7 @@ export const SHOPS: ShopDefinition[] = [
 		// LDLC group platform since 2025: same search form as LDLC (POST /recherche/, GET /recherche/<q>/).
 		searchUrl: (q) => `https://www.rueducommerce.fr/recherche/${enc(q)}/`,
 		productUrlPattern: /\/(?:fiche\/PB\d+\.html|produit\/|p\/[^/?#]+)/i,
-		listing: {
-			item: 'article.item, .listing-item, [data-product-id]',
-			title: '.item__title, h2, .title',
-			price: '.item__price, .price',
-			stock: '[class*="stock"], [class*="availability"]',
-		},
+		// Cards not mapped yet: the product links strategy reads them (probe of 27/10: 10 offers).
 	},
 	{
 		id: 'infomax',

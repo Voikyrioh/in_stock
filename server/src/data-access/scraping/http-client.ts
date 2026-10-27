@@ -184,7 +184,8 @@ const CHALLENGE_MARKERS = [
 	'/errors/validateCaptcha',
 ]
 
-function isChallengePage(body: string): boolean {
+/** Exported for tests. */
+export function isChallengePage(body: string): boolean {
 	if (body.length > 200_000) return false
 	return CHALLENGE_MARKERS.some((m) => body.includes(m))
 }
