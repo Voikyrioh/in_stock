@@ -5,6 +5,7 @@ import { groupingKey, normaliseGtin } from '../grouping'
 import { bestOffer, compareOffers, isDue, refreshCooldownLeft } from '../offers'
 import { parseCurrency, parsePrice } from '../price'
 import { cleanQuery, looksLikeUrl, queryKey } from '../query'
+import { robotsScope } from '../robots'
 import { shopState } from '../shop-state'
 import { stockFromAvailability, stockFromText } from '../stock'
 import { checkUrlShape, normaliseOfferUrl, shopNameFromHost } from '../url'
@@ -241,5 +242,12 @@ describe('BR-FOLLOW / BR-ACCOUNT rules', () => {
 		expect(isValidPassword('court')).to.equal(false)
 		expect(isValidPassword('motdepasse12')).to.equal(true)
 		expect(isValidPassword('x'.repeat(129))).to.equal(false)
+	})
+})
+
+describe('BR-SCRAPE-001 robots.txt scope', () => {
+	it('should apply every group to the scheduler and named groups only to a person', () => {
+		expect(robotsScope('schedule')).to.equal('every-group')
+		expect(robotsScope('user')).to.equal('named-group-only')
 	})
 })

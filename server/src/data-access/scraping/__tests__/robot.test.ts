@@ -2,7 +2,7 @@ import { expect } from 'chai'
 import { ScrapeFailure } from '../../../domain/ports/scraper'
 import { HostQueue } from '../host-queue'
 import { decode, SafeHttpClient } from '../http-client'
-import { RobotsPolicy } from '../robots'
+import { namedGroupsOnly, RobotsPolicy } from '../robots'
 import { isForbiddenHost, isPublicAddress } from '../ssrf-guard'
 
 describe('BR-SCRAPE-003 address guard', () => {
@@ -156,7 +156,7 @@ describe('BR-SCRAPE-001 robots.txt', () => {
 			fetchRobots: async () => ({ status: 200, body: 'User-agent: *\nDisallow: /s\n' }),
 		})
 		const error = await policy
-			.assertAllowed('https://www.amazon.fr/s?k=rtx')
+			.assertAllowed('https://www.amazon.fr/s?k=rtx', 'every-group')
 			.catch((e: unknown) => e)
 		expect((error as ScrapeFailure).kind).to.equal('robots')
 		expect(await policy.isAllowed('https://www.amazon.fr/dp/B0CS6V4VXQ')).to.equal(true)
@@ -191,5 +191,49 @@ describe('BR-SCRAPE-001 robots.txt', () => {
 		])
 		await policy.isAllowed('https://shop.fr/c')
 		expect(calls).to.equal(1)
+	})
+})
+
+describe('BR-SCRAPE-001 who asked for the page', () => {
+	const shopRobots =
+		'User-agent: *\nDisallow: /recherche/\nDisallow: /panier\n\nUser-agent: Googlebot\nAllow: /\n'
+	const policy = (body: string) =>
+		new RobotsPolicy({ agent: 'InStockBot', fetchRobots: async () => ({ status: 200, body }) })
+
+	it('should apply the * group to the scheduled refresh (a crawler)', async () => {
+		expect(
+			await policy(shopRobots).isAllowed('https://shop.fr/recherche/rtx/', 'every-group'),
+		).to.equal(false)
+	})
+
+	it('should read a page a person asked for when no group names InStockBot', async () => {
+		expect(
+			await policy(shopRobots).isAllowed('https://shop.fr/recherche/rtx/', 'named-group-only'),
+		).to.equal(true)
+	})
+
+	it('should always obey a group that names InStockBot', async () => {
+		const named = `${shopRobots}\nUser-agent: instockbot\nDisallow: /\n`
+		const error = await policy(named)
+			.assertAllowed('https://shop.fr/fiche/1.html', 'named-group-only')
+			.catch((e: unknown) => e)
+		expect((error as ScrapeFailure).kind).to.equal('robots')
+	})
+
+	it('should not block a person when robots.txt is unreachable', async () => {
+		const down = new RobotsPolicy({
+			agent: 'InStockBot',
+			fetchRobots: async () => ({ status: 503, body: '' }),
+		})
+		expect(await down.isAllowed('https://shop.fr/p', 'named-group-only')).to.equal(true)
+	})
+
+	it('should keep only the groups that name the agent', () => {
+		const txt =
+			'User-agent: *\nDisallow: /a\n\nUser-agent: Foo\nUser-agent: InStockBot # nous\nDisallow: /b\nAllow: /b/ok\n\nUser-agent: Bar\nDisallow: /c\n'
+		expect(namedGroupsOnly(txt, 'InStockBot')).to.equal(
+			'User-agent: foo\nUser-agent: instockbot\nDisallow: /b\nAllow: /b/ok\n',
+		)
+		expect(namedGroupsOnly('User-agent: *\nDisallow: /\n', 'InStockBot')).to.equal(null)
 	})
 })

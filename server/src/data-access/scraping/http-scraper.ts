@@ -1,4 +1,10 @@
-import { type ScrapedOffer, ScrapeFailure, type Scraper } from '../../domain/ports/scraper'
+import {
+	type ReadOptions,
+	type ScrapedOffer,
+	ScrapeFailure,
+	type Scraper,
+} from '../../domain/ports/scraper'
+import { type ReadingTrigger, robotsScope } from '../../domain/rules/robots'
 import { extractListing, type ListedOffer } from './extract/listing'
 import { extractProduct, isProduct } from './extract/product-page'
 import type { HostQueue } from './host-queue'
@@ -40,7 +46,8 @@ export class HttpScraper implements Scraper {
 		const shop = this.deps.catalog.definition(shopId)
 		if (!shop?.searchUrl) throw new ScrapeFailure('unsupported', `${shopId} has no search`)
 		const url = shop.searchUrl(query)
-		const page = await this.fetch(url, signal)
+		// A search is always asked by a person (BR-SCRAPE-001).
+		const page = await this.fetch(url, 'user', signal)
 		const { offers: listed, strategy } = extractListing(page.body, {
 			pageUrl: page.url,
 			hosts: shop.hosts,
@@ -67,7 +74,7 @@ export class HttpScraper implements Scraper {
 			if (incomplete && enriched < ENRICH_LIMIT && !signal.aborted) {
 				enriched++
 				try {
-					offers.push(merge(item, await this.readProduct(item.url, signal)))
+					offers.push(merge(item, await this.readProduct(item.url, { signal, trigger: 'user' })))
 					continue
 				} catch (error) {
 					if (!(error instanceof ScrapeFailure)) throw error
@@ -79,19 +86,24 @@ export class HttpScraper implements Scraper {
 		return { offers, diagnostics }
 	}
 
-	async readProduct(url: string, signal?: AbortSignal): Promise<ScrapedOffer> {
+	async readProduct(url: string, { signal, trigger }: ReadOptions): Promise<ScrapedOffer> {
 		const shop = this.deps.catalog.definitionForHost(safeHost(url))
-		const page = await this.fetch(url, signal)
+		const page = await this.fetch(url, trigger, signal)
 		const product = extractProduct(page.body, page.url, shop?.product)
 		if (!isProduct(product)) throw new ScrapeFailure('no-product', 'No product found on this page')
 		return toScraped(page.url, product)
 	}
 
 	/** Every request: robots.txt, then the per-site queue, then the guarded client. */
-	private async fetch(url: string, signal?: AbortSignal): Promise<HttpPage> {
+	private async fetch(
+		url: string,
+		trigger: ReadingTrigger,
+		signal?: AbortSignal,
+	): Promise<HttpPage> {
 		const host = safeHost(url)
 		// The robots.txt download itself goes through the queue (see createRobotsPolicy).
-		if (this.deps.respectRobots !== false) await this.deps.robots.assertAllowed(url, signal)
+		if (this.deps.respectRobots !== false)
+			await this.deps.robots.assertAllowed(url, robotsScope(trigger), signal)
 		return this.deps.queue.run(
 			host,
 			() => this.deps.http.get(url, { signal, expect: 'html' }),

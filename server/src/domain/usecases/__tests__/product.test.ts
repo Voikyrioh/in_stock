@@ -14,6 +14,8 @@ describe('us-ajouter-par-lien (AddProductFromUrl)', () => {
 		const again = await uc.addFromUrl.Execute(LDLC)
 		expect(again).to.deep.equal({ productId: created.productId, created: false })
 		expect(scraper.readCalls).to.have.length(1)
+		// BR-SCRAPE-001: a pasted link is the person's own request.
+		expect(scraper.readTriggers).to.deep.equal(['user'])
 		const view = await uc.getProduct.Execute(created.productId, null)
 		expect(view.offers[0]).to.include({ shopId: 'ldlc', shopName: 'LDLC', priceCents: 59995 })
 	})
@@ -80,7 +82,7 @@ describe('us-consulter-un-produit (GetProduct / RefreshProduct)', () => {
 		scraper.pages.set(LDLC, reading(LDLC, { priceCents: 54995 }))
 		const view = await uc.getProduct.Execute(productId, null)
 		expect(view.refreshing).to.equal(true)
-		await uc.refresher.refresh(productId)
+		await uc.refresher.refresh(productId, 'user')
 		const after = await uc.getProduct.Execute(productId, null)
 		expect(after.bestOffer?.priceCents).to.equal(54995)
 	})

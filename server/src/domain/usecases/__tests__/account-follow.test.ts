@@ -145,8 +145,11 @@ describe('us-suivre-un-produit', () => {
 		expect(await uc.refreshDue.Execute()).to.equal(0)
 		clock.advance(31 * 60_000)
 		scraper.readCalls = []
+		scraper.readTriggers = []
 		expect(await uc.refreshDue.Execute()).to.equal(1)
 		expect(scraper.readCalls).to.deep.equal(['https://www.ldlc.com/fiche/PB1.html'])
+		// BR-SCRAPE-001: the scheduler is a crawler, robots.txt applies in full.
+		expect(scraper.readTriggers.at(-1)).to.equal('schedule')
 		expect(await uc.refreshDue.Execute()).to.equal(0)
 	})
 })

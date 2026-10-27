@@ -25,7 +25,7 @@ export class RefreshProductUseCase extends UseCase {
 				'refresh-too-soon',
 			)
 		}
-		await this.runStep('Read shops', () => this.deps.refresher.refresh(productId))
+		await this.runStep('Read shops', () => this.deps.refresher.refresh(productId, 'user'))
 		return productView(this.deps, productId, userId)
 	}
 }
