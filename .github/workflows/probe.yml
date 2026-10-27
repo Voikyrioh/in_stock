@@ -1,0 +1,57 @@
+# Probe shops (STK-15): runs the shop probe on a GitHub runner, with real
+# Internet access, and keeps each shop's robots.txt and raw search page as an
+# artifact to check the search URLs and card selectors of
+# server/src/data-access/scraping/shops/definitions.ts.
+# The runner's address is not the server's: a shop may answer differently.
+name: Probe shops
+
+on:
+  workflow_dispatch:
+    inputs:
+      target:
+        description: "Boutique (id de definitions.ts), all, ou url"
+        default: all
+      query:
+        description: "Recherche (ou lien si target=url)"
+        default: rtx 4070
+
+permissions:
+  contents: read
+  packages: read
+
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: 'npm'
+
+      - run: npm ci
+        env:
+          GITHUB_TOKEN: ${{ secrets.NPM_TOKEN || secrets.GITHUB_TOKEN }}
+
+      - name: Build
+        run: npm run build -w server
+
+      - name: Probe
+        working-directory: server
+        env:
+          OTEL_SDK_DISABLED: 'true'
+          STORAGE: memory
+          PROBE_DUMP_DIR: ${{ runner.temp }}/probe
+          TARGET: ${{ inputs.target }}
+          QUERY: ${{ inputs.query }}
+        run: node dist/tools/probe.js "$TARGET" "$QUERY"
+
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: probe-pages
+          path: ${{ runner.temp }}/probe
+          if-no-files-found: ignore
+          retention-days: 7
