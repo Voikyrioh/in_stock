@@ -12,7 +12,7 @@ maj: 2026-10-27
 
 ## Règle
 
-« Lecture interdite par la boutique » si son robots.txt interdit la recherche ; « Indisponible » pendant une pause demandée par la boutique ou à partir de 3 échecs consécutifs ; « Perturbée » après 1 ou 2 échecs ; « Opérationnelle » si le dernier relevé a réussi ; « Pas encore interrogée » sinon. Seule une recherche réussie lève l'interdiction robots.txt.
+« Lecture interdite par la boutique » si son robots.txt interdit la recherche à InStockBot nommément (BR-SCRAPE-001) ; « Indisponible » pendant une pause demandée par la boutique ou à partir de 3 échecs consécutifs ; « Perturbée » après 1 ou 2 échecs ; « Opérationnelle » si le dernier relevé a réussi ; « Pas encore interrogée » sinon. Seule une recherche réussie lève l'interdiction robots.txt.
 
 ## Application (code)
 
@@ -31,3 +31,4 @@ maj: 2026-10-27
 ## Historique
 
 - 2026-10-27 — création (session 2026-10-27-refonte-in-stock)
+- 2026-10-27 — « Lecture interdite » : seulement quand le robots.txt nomme InStockBot (révision BR-SCRAPE-001)

@@ -9,7 +9,7 @@ déployé sur l'infra Scaleway (`in-stock.voikyrioh.fr`).
 - Ajout de n'importe quel produit par son lien (toute boutique qui publie ses données produit schema.org)
 - Fiche produit comparée par boutique, actualisation, historique des prix enregistré
 - Comptes, suivis relevés automatiquement toutes les 30 minutes
-- Robot poli et déclaré (`InStockBot`) : robots.txt, une requête à la fois par boutique
+- Robot poli et déclaré (`InStockBot`) : robots.txt pour le relevé automatique, refus nominatifs toujours respectés, une requête à la fois par boutique (ADR-0003)
 
 ## Démarrer en local
 

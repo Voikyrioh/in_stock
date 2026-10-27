@@ -21,7 +21,7 @@ Corps : `{ "query": "rtx 4070" }` (2 à 100 caractères après nettoyage).
 }
 ```
 
-`status` : `pending` · `done` · `cached` · `failed` · `timeout` · `forbidden` (robots.txt) · `blocked` (anti-robot / 429).
+`status` : `pending` · `done` · `cached` · `failed` · `timeout` · `forbidden` (robots.txt qui nomme InStockBot) · `blocked` (anti-robot / 429).
 `results` : regroupés par produit (BR-SEARCH-006), triés disponibilité puis prix (BR-SEARCH-005).
 
 | HTTP | code | reason | Quand |
