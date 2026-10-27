@@ -13,7 +13,7 @@ Corps : `{ "url": "https://www.ldlc.com/fiche/PB00561234.html" }` (≤ 2000 cara
 | 400 | invalid-payload | url-format | pas un lien http(s) |
 | 400 | invalid-payload | url-forbidden | port non standard, identifiants, adresse non publique (BR-SCRAPE-003) |
 | 400 | invalid-payload | no-product | aucune donnée produit (BR-SCRAPE-004) |
-| 403 | forbidden | robots | robots.txt interdit la page |
+| 403 | forbidden | robots | robots.txt interdit la page à InStockBot nommément (BR-SCRAPE-001) |
 | 503 | service-unavailable | blocked | la boutique bloque le robot |
 | 503 | service-unavailable | unreachable | site injoignable, trop lent, page trop lourde |
 | 429 | rate-limited | add | plus de 10 ajouts / min |

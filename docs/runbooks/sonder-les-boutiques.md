@@ -20,7 +20,7 @@ docker exec in-stock node dist/tools/probe.js url https://www.ldlc.com/fiche/PB0
 Depuis un poste avec le repo (autre adresse IP, utile pour itérer sur un sélecteur) :
 `npm run probe -- ldlc "rtx 4070"`.
 
-Même robot qu'en production (robots.txt, User-Agent InStockBot, file par site, garde d'adresse).
+Même robot qu'en production (User-Agent InStockBot, file par site, garde d'adresse). La sonde lit comme une personne : seuls les groupes robots.txt qui nomment InStockBot s'appliquent (BR-SCRAPE-001).
 Sortie par boutique : URL appelée, `strategy` (json-ld, selectors, links, product-page, none),
 nombre d'offres listées, 5 premières offres (prix, stock, titre, lien), ou l'échec (`robots`,
 `blocked`, `unreachable`, `http`…).
@@ -32,7 +32,7 @@ nombre d'offres listées, 5 premières offres (prix, stock, titre, lien), ou l'�
 | `strategy: selectors`, prix et stocks présents | parfait | rien |
 | `strategy: links`, prix présents | les sélecteurs de cartes ne trouvent rien, le repli fonctionne | corriger `listing.item` / `title` / `price` / `stock` |
 | `listed 0`, pas d'échec | URL de recherche fausse ou page rendue en JavaScript | corriger `searchUrl` ; si JavaScript : retirer `searchUrl` (ajout par lien seulement) |
-| `FAILED (robots)` | robots.txt interdit la recherche | rien : la boutique reste « Lecture interdite » |
+| `FAILED (robots)` | robots.txt interdit nommément InStockBot | rien : la boutique reste « Lecture interdite » |
 | `FAILED (blocked)` | anti-robot (Cloudflare, DataDome) | rien (pas de contournement, ADR-0003) ; envisager `DISABLED_SHOPS` |
 | `FAILED (http)` 404 | URL de recherche fausse | corriger `searchUrl` |
 

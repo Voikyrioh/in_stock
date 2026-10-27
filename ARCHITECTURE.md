@@ -60,6 +60,7 @@ implémente les ports. Le domaine n'importe que Zod et `@Voikyrioh/observability
 ```
 Scraper.search / readProduct
   └─ RobotsPolicy.assertAllowed (robots.txt en cache 12 h, téléchargé via la file)
+       planificateur : tout le fichier ; lecture demandée par une personne : groupes « InStockBot » seulement
   └─ HostQueue.run(site)           1 requête à la fois par site, ≥ 2 s d'écart, pause 10 min si 429/503
        └─ SafeHttpClient.get       http(s), port standard, IP publique (vérifiée au connect),
                                    3 redirections, 10 s, 3 Mo, charset, détection anti-robot

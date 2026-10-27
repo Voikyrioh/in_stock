@@ -30,7 +30,7 @@ Une fiche par règle (skill `business-rule`). Source : specs fonctionnelles `org
 - [BR-OFFER-003](./BR-OFFER-003-actualisation-manuelle-2-minutes.md) — Actualisation manuelle au plus toutes les 2 minutes — `refreshCooldownLeft` — —
 - [BR-OFFER-004](./BR-OFFER-004-echec-garde-le-dernier-etat.md) — Un relevé en échec garde le dernier état connu — `Offer.withFailure` — —
 - [BR-OFFER-005](./BR-OFFER-005-meilleur-prix-en-stock.md) — Meilleur prix en stock — `bestOffer` — —
-- [BR-SCRAPE-001](./BR-SCRAPE-001-robots-txt.md) — Le robots.txt de chaque site est respecté — `RobotsPolicy` — ✓
+- [BR-SCRAPE-001](./BR-SCRAPE-001-robots-txt.md) — robots.txt selon qui demande la lecture — `RobotsPolicy` — ✓
 - [BR-SCRAPE-002](./BR-SCRAPE-002-politesse.md) — Une requête à la fois par site, 2 s d'écart, pause sur demande — `HostQueue` — ✓
 - [BR-SCRAPE-003](./BR-SCRAPE-003-adresses-publiques-seulement.md) — Le robot ne lit que des adresses publiques — `checkUrlShape` — ✓
 - [BR-SCRAPE-004](./BR-SCRAPE-004-page-produit.md) — Une page est un produit si elle a un nom et un prix ou un stock — `isReadableProduct` — ✓

@@ -38,7 +38,7 @@ onMounted(async () => {
 			<ShopCard v-for="shop in shops ?? []" :key="shop.id" :shop="shop" :now="now" />
 		</div>
 		<p class="note">
-			Notre robot s'appelle InStockBot. Il donne son nom à chaque visite, respecte le fichier robots.txt de chaque boutique et ne fait
+			Notre robot s'appelle InStockBot. Il donne son nom à chaque visite, respecte les règles robots.txt qui le visent et ne fait
 			qu'une requête à la fois par boutique. <RouterLink :to="{ name: 'robot' }">En savoir plus</RouterLink>
 		</p>
 	</div>

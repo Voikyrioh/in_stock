@@ -26,7 +26,7 @@ export class RefreshDueOffersUseCase extends UseCase {
 			this.deps.offers.listDueFollowed(before, this.deps.batchSize ?? 20),
 		)
 		await this.runStep('Read offers', () =>
-			Promise.allSettled(due.map((offer) => this.deps.refresher.refreshOffer(offer))),
+			Promise.allSettled(due.map((offer) => this.deps.refresher.refreshOffer(offer, 'schedule'))),
 		)
 		return due.length
 	}

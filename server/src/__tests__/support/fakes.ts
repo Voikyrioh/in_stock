@@ -6,7 +6,12 @@ import { memoryRepositories } from '../../data-access/repository/memory/memory.r
 import { StaticShopCatalog } from '../../data-access/scraping/shops/catalog'
 import type { ShopDefinition } from '../../data-access/scraping/shops/definitions'
 import { sha256TokenService } from '../../data-access/security/session-tokens'
-import { type ScrapedOffer, ScrapeFailure, type Scraper } from '../../domain/ports/scraper'
+import {
+	type ReadOptions,
+	type ScrapedOffer,
+	ScrapeFailure,
+	type Scraper,
+} from '../../domain/ports/scraper'
 import type { Clock, PasswordHasher } from '../../domain/ports/system'
 
 export const TEST_SHOPS: ShopDefinition[] = [
@@ -83,8 +88,11 @@ export class FakeScraper implements Scraper {
 		return behaviour
 	}
 
-	async readProduct(url: string): Promise<ScrapedOffer> {
+	readTriggers: ReadOptions['trigger'][] = []
+
+	async readProduct(url: string, options: ReadOptions): Promise<ScrapedOffer> {
 		this.readCalls.push(url)
+		this.readTriggers.push(options.trigger)
 		const page = this.pages.get(url)
 		if (!page) throw new ScrapeFailure('no-product', 'none')
 		if (page instanceof ScrapeFailure) throw page

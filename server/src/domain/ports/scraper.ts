@@ -1,4 +1,5 @@
 import type { StockState } from '@in-stock/shared'
+import type { ReadingTrigger } from '../rules/robots'
 
 /** What the robot read for one offer, before it is matched to a product. */
 export interface ScrapedOffer {
@@ -38,11 +39,17 @@ export class ScrapeFailure extends Error {
 	}
 }
 
+export interface ReadOptions {
+	signal?: AbortSignal
+	/** BR-SCRAPE-001: decides which robots.txt rules apply. */
+	trigger: ReadingTrigger
+}
+
 export interface Scraper {
-	/** Offers found by the shop search page for this query (BR-SEARCH-004: 10 at most). */
+	/** Offers found by the shop search page for this query (BR-SEARCH-004: 10 at most). Always asked by a person. */
 	search(shopId: string, query: string, signal: AbortSignal): Promise<ScrapedOffer[]>
 	/** Reads one product page, of a known shop or not. */
-	readProduct(url: string, signal?: AbortSignal): Promise<ScrapedOffer>
+	readProduct(url: string, options: ReadOptions): Promise<ScrapedOffer>
 }
 
 export interface ShopInfo {

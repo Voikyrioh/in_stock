@@ -39,7 +39,10 @@ export class AddProductFromUrlUseCase extends UseCase {
 		let reading: Awaited<ReturnType<Scraper['readProduct']>>
 		try {
 			reading = await this.runStep('Read page', () =>
-				this.deps.scraper.readProduct(url, AbortSignal.timeout(25_000)),
+				this.deps.scraper.readProduct(url, {
+					signal: AbortSignal.timeout(25_000),
+					trigger: 'user',
+				}),
 			)
 		} catch (error) {
 			if (!(error instanceof ScrapeFailure)) throw error
