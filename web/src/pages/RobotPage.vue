@@ -18,7 +18,14 @@ usePageTitle(() => 'Notre robot')
 			</p>
 			<h3>Les règles qu'il respecte</h3>
 			<ul>
-				<li>Il lit le fichier <code>robots.txt</code> de chaque site et ne visite jamais une page qu'il interdit.</li>
+				<li>
+					Pour relever automatiquement les produits suivis, il respecte tout le fichier <code>robots.txt</code> de chaque site, comme
+					un robot d'indexation.
+				</li>
+				<li>
+					Quand une personne lance une recherche, colle un lien ou ouvre une fiche, il lit la page pour elle, comme son navigateur.
+					Il ne suit alors que les règles qui nomment InStockBot.
+				</li>
 				<li>Il ne fait qu'une requête à la fois par boutique, avec au moins deux secondes entre deux requêtes.</li>
 				<li>Quand une boutique demande de ralentir (codes 429 ou 503), il s'arrête plusieurs minutes.</li>
 				<li>Il ne contourne aucune protection : pas de résolution de CAPTCHA, pas de connexion à un compte, pas de proxy.</li>
@@ -26,8 +33,9 @@ usePageTitle(() => 'Notre robot')
 			</ul>
 			<h3>Vous gérez une boutique ?</h3>
 			<p>
-				Pour limiter ou interdire le passage d'InStockBot, ajoutez une règle à votre <code>robots.txt</code>, par exemple
-				<code>User-agent: InStockBot</code> puis <code>Disallow: /</code>. Elle est prise en compte sous 12 heures.
+				Pour limiter ou interdire le passage d'InStockBot, ajoutez une règle qui le nomme dans votre <code>robots.txt</code>, par
+				exemple <code>User-agent: InStockBot</code> puis <code>Disallow: /</code>. Elle s'applique à toutes ses visites, y compris
+				celles demandées par une personne, sous 12 heures.
 			</p>
 		</article>
 	</div>
