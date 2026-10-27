@@ -1,7 +1,7 @@
 /**
  * Probe a shop from the machine where the robot runs (STK-15):
  *   npm run probe -- ldlc "rtx 4070"        search page: strategy, offers found
- *   npm run probe -- all "rtx 4070"         every searchable shop
+ *   npm run probe -- all "rtx 4070"         every searchable shop (or ldlc,grosbill)
  *   npm run probe -- url https://…          one product page
  * Same robot as production (robots.txt, User-Agent, address guard, queue).
  * PROBE_DUMP_DIR=<dir>: also saves each shop's robots.txt and raw search page
@@ -79,6 +79,8 @@ function printPage(id: string, html: string, url: string) {
 	if (!shop) return
 	const $ = load(html)
 	console.log(`    title: ${$('title').text().trim().slice(0, 120)}`)
+	if (html.length < 5000)
+		console.log(`    page courte: ${html.replace(/\s+/g, ' ').slice(0, 1200)}`)
 	console.log(
 		`    json-ld: ${$('script[type="application/ld+json"]').length}, __NEXT_DATA__: ${$('#__NEXT_DATA__').length}`,
 	)
@@ -127,7 +129,9 @@ function printCards($: CheerioAPI, url: string, hosts: string[]) {
 			return
 		}
 		const looksLikeProduct = /\d{5,}|\/(dp|p|fiche|produit|product)\//i.test(u.pathname)
-		if (!hosts.includes(u.hostname) || !looksLikeProduct || cleanText(link.text()) === null) return
+		const samePage = u.pathname === new URL(url).pathname
+		if (!hosts.includes(u.hostname) || samePage || !looksLikeProduct || !cleanText(link.text()))
+			return
 		shown++
 		const chain: string[] = []
 		let node = link
@@ -138,8 +142,11 @@ function printCards($: CheerioAPI, url: string, hosts: string[]) {
 		}
 		console.log(`    --- carte autour de ${u.pathname.slice(0, 100)} ---`)
 		console.log(`      ${chain.join(' < ')}`)
-		const card = link.parents().eq(3)
-		console.log(`      ${(card.html() ?? '').replace(/\s+/g, ' ').slice(0, 1500)}`)
+		const card = link.closest('article, li').length
+			? link.closest('article, li')
+			: link.parents().eq(2)
+		const html = (card.html() ?? '').replace(/<svg[\s\S]*?<\/svg>/g, '<svg/>').replace(/\s+/g, ' ')
+		console.log(`      ${html.slice(0, 4000)}`)
 	})
 }
 
@@ -221,7 +228,7 @@ if (target === 'url') {
 					.list()
 					.filter((s) => s.capabilities.includes('search'))
 					.map((s) => s.id)
-			: [target]
+			: target.split(',')
 	for (const id of ids) await probeShop(id)
 }
 process.exit(0)

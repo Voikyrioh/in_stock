@@ -150,8 +150,9 @@ export const SHOPS: ShopDefinition[] = [
 		country: 'FR',
 		homepage: 'https://www.rueducommerce.fr/',
 		hosts: ['www.rueducommerce.fr', 'rueducommerce.fr'],
-		searchUrl: (q) => `https://www.rueducommerce.fr/r/${enc(q)}.html`,
-		productUrlPattern: /\/p\/[^/?#]+/i,
+		// LDLC group platform since 2025: same search form as LDLC (POST /recherche/, GET /recherche/<q>/).
+		searchUrl: (q) => `https://www.rueducommerce.fr/recherche/${enc(q)}/`,
+		productUrlPattern: /\/(?:fiche\/PB\d+\.html|produit\/|p\/[^/?#]+)/i,
 		listing: {
 			item: 'article.item, .listing-item, [data-product-id]',
 			title: '.item__title, h2, .title',
