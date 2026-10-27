@@ -11,9 +11,10 @@
 import { configureLogger } from '@Voikyrioh/observability'
 import { mkdir, writeFile } from 'node:fs/promises'
 import { join } from 'node:path'
-import { load } from 'cheerio'
+import { type CheerioAPI, load } from 'cheerio'
 import { loadConfig } from '../config'
 import { createRobot } from '../data-access/scraping'
+import { cleanText } from '../data-access/scraping/extract/html'
 import { SafeHttpClient } from '../data-access/scraping/http-client'
 import { ScrapeFailure } from '../domain/ports/scraper'
 
@@ -56,6 +57,8 @@ async function dump(id: string) {
 	await save(`${id}.robots.txt`, new URL('/robots.txt', shop.homepage).toString(), 'text')
 	await new Promise((r) => setTimeout(r, config.robot.minDelayMs))
 	await save(`${id}.search.html`, shop.searchUrl(arg), 'html')
+	await new Promise((r) => setTimeout(r, config.robot.minDelayMs))
+	await printSearchForms(id)
 }
 
 /** robots.txt lines that matter to us: groups `*` and InStockBot. */
@@ -92,7 +95,10 @@ function printPage(id: string, html: string, url: string) {
 		shop.productUrlPattern.test(`https://${shop.hosts[0]}${h}`),
 	)
 	console.log(`    liens internes ${hrefs.size}, dont fiches (productUrlPattern) ${product.length}`)
-	for (const h of [...hrefs].slice(0, 25)) console.log(`      ${h.slice(0, 140)}`)
+	const others = [...hrefs].filter((h) => !product.includes(h))
+	for (const h of [...product.slice(0, 5), ...others].slice(0, 25))
+		console.log(`      ${h.slice(0, 140)}`)
+	printCards($, url, shop.hosts)
 	const priceAt = [...html.matchAll(/\d[\d\s.]*[,.]\d{2}\s*(€|&euro;)|\d+\s*€\s*\d{2}/g)].slice(
 		0,
 		3,
@@ -102,6 +108,70 @@ function printPage(id: string, html: string, url: string) {
 		console.log(
 			`    --- HTML avant le prix « ${m[0]} » ---\n${html.slice(start, (m.index ?? 0) + 60).replace(/\s+/g, ' ')}`,
 		)
+	}
+}
+
+/**
+ * Ancestors of the first links that look like a product (long slug or id),
+ * matched or not by productUrlPattern: the class names the card selectors need.
+ */
+function printCards($: CheerioAPI, url: string, hosts: string[]) {
+	let shown = 0
+	$('a[href]').each((_, el) => {
+		if (shown >= 2) return false
+		const link = $(el)
+		let u: URL
+		try {
+			u = new URL(link.attr('href') ?? '', url)
+		} catch {
+			return
+		}
+		const looksLikeProduct = /\d{5,}|\/(dp|p|fiche|produit|product)\//i.test(u.pathname)
+		if (!hosts.includes(u.hostname) || !looksLikeProduct || cleanText(link.text()) === null) return
+		shown++
+		const chain: string[] = []
+		let node = link
+		for (let level = 0; level < 7 && node.length; level++) {
+			const cls = (node.attr('class') ?? '').trim().replace(/\s+/g, '.')
+			chain.push(`${node.prop('tagName')?.toLowerCase()}${cls ? `.${cls}` : ''}`)
+			node = node.parent()
+		}
+		console.log(`    --- carte autour de ${u.pathname.slice(0, 100)} ---`)
+		console.log(`      ${chain.join(' < ')}`)
+		const card = link.parents().eq(3)
+		console.log(`      ${(card.html() ?? '').replace(/\s+/g, ' ').slice(0, 1500)}`)
+	})
+}
+
+/** Search forms of the home page: where the shop really sends a query. */
+async function printSearchForms(id: string) {
+	const shop = catalog.definition(id)
+	if (!shop) return
+	try {
+		const page = await raw.get(shop.homepage, {
+			expect: 'html',
+			allowHttpErrors: true,
+			signal: AbortSignal.timeout(30_000),
+		})
+		const $ = load(page.body)
+		console.log(`\n□ ${id} formulaires de l'accueil (HTTP ${page.status})`)
+		$('form').each((_, el) => {
+			const form = $(el)
+			const inputs = form
+				.find('input[name], select[name]')
+				.map((_, i) => `${$(i).attr('name')}=${$(i).attr('value') ?? ''}`)
+				.get()
+			console.log(
+				`    ${(form.attr('method') ?? 'get').toUpperCase()} ${form.attr('action') ?? '(sans action)'} [${inputs.join(', ')}]`,
+			)
+		})
+		const searchLinks = new Set<string>()
+		$('a[href*="search" i], a[href*="recherche" i]').each((_, el) => {
+			searchLinks.add(($(el).attr('href') ?? '').slice(0, 140))
+		})
+		for (const h of [...searchLinks].slice(0, 5)) console.log(`    lien ${h}`)
+	} catch (error) {
+		console.log(`\n□ ${id} accueil illisible: ${(error as Error).message}`)
 	}
 }
 

@@ -29,6 +29,14 @@ export interface ShopDefinition {
 const enc = encodeURIComponent
 const plus = (q: string) => enc(q).replace(/%20/g, '+')
 
+/**
+ * Grosbill and Cybertek share one platform since 2026: product pages are a slug
+ * ending with a numeric id (/pny-rtx-5060-8gb-overclocked-dual-fan-153530),
+ * categories a short one (/carte-graphique-6). Old *.aspx links still kept.
+ */
+const GROSBILL_CYBERTEK_PRODUCT =
+	/^https?:\/\/[^/]+\/(?:[a-z0-9]+-)+\d{5,}\/?(?:[?#]|$)|-\d+\.aspx(?:[?#]|$)/i
+
 export const SHOPS: ShopDefinition[] = [
 	{
 		id: 'ldlc',
@@ -79,8 +87,8 @@ export const SHOPS: ShopDefinition[] = [
 		country: 'FR',
 		homepage: 'https://www.topachat.com/',
 		hosts: ['www.topachat.com', 'topachat.com'],
-		searchUrl: (q) =>
-			`https://www.topachat.com/pages/recherche.php?cat=accueil&etou=0&mc=${plus(q)}`,
+		// The old recherche.php now redirects to the home page; the site links to /search/<q>.
+		searchUrl: (q) => `https://www.topachat.com/search/${enc(q)}`,
 		productUrlPattern: /\/(pages\/detail2_|produit\/)/i,
 		listing: {
 			item: 'article.grille-produit, section.produits article, .produits.list article',
@@ -95,8 +103,8 @@ export const SHOPS: ShopDefinition[] = [
 		country: 'FR',
 		homepage: 'https://www.grosbill.com/',
 		hosts: ['www.grosbill.com', 'grosbill.com'],
-		searchUrl: (q) => `https://www.grosbill.com/catv2.cgi?mode=recherche&recherche=${plus(q)}`,
-		productUrlPattern: /-\d+\.aspx(\?|$)/i,
+		searchUrl: (q) => `https://www.grosbill.com/recherche?q=${enc(q)}`,
+		productUrlPattern: GROSBILL_CYBERTEK_PRODUCT,
 		listing: {
 			item: '.grb__liste-produit__liste__produit, .listing_produit, [class*="produit-item"]',
 			title: '.grb__liste-produit__liste__produit__information__libelle, h2, .titre',
@@ -127,8 +135,8 @@ export const SHOPS: ShopDefinition[] = [
 		country: 'FR',
 		homepage: 'https://www.cybertek.fr/',
 		hosts: ['www.cybertek.fr', 'cybertek.fr'],
-		searchUrl: (q) => `https://www.cybertek.fr/boutique/produit.aspx?q=${plus(q)}`,
-		productUrlPattern: /-\d+\.aspx(\?|$)/i,
+		searchUrl: (q) => `https://www.cybertek.fr/recherche?q=${enc(q)}`,
+		productUrlPattern: GROSBILL_CYBERTEK_PRODUCT,
 		listing: {
 			item: '.listing_produit .produit, .product-item, [class*="ProductCard"]',
 			title: '.nom_produit, .product-name, h2',

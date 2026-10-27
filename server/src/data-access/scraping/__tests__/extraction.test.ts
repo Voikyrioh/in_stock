@@ -168,4 +168,18 @@ describe('Shop definitions', () => {
 			expect(url.toString()).to.not.include(' ')
 		}
 	})
+
+	it('should tell Grosbill and Cybertek product pages from their categories', () => {
+		for (const id of ['grosbill', 'cybertek']) {
+			const { productUrlPattern: pattern, hosts } = shop(id)
+			const at = (path: string) => `https://${hosts[0]}${path}`
+			expect(pattern.test(at('/pny-rtx-5060-8gb-overclocked-dual-fan-153530')), id).to.equal(true)
+			expect(
+				pattern.test(at('/pny-rtx-5060-8gb-overclocked-dual-fan-153530#click-collect')),
+			).to.equal(true)
+			expect(pattern.test(at('/carte-graphique-6')), id).to.equal(false)
+			expect(pattern.test(at('/pc-fixe-106/gamer')), id).to.equal(false)
+			expect(pattern.test(at('/recherche?q=rtx%204070')), id).to.equal(false)
+		}
+	})
 })
