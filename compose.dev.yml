@@ -1,0 +1,14 @@
+# Local Postgres for development: docker compose -f compose.dev.yml up -d
+services:
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: in_stock
+      POSTGRES_PASSWORD: in_stock
+      POSTGRES_DB: in_stock
+    ports:
+      - "5432:5432"
+    volumes:
+      - in-stock-pg:/var/lib/postgresql/data
+volumes:
+  in-stock-pg:
