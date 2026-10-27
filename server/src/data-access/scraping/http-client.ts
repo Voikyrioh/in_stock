@@ -179,9 +179,13 @@ const CHALLENGE_MARKERS = [
 	'/_Incapsula_Resource',
 	'Robot Check</title>',
 	'px-captcha',
+	// Amazon: AWS WAF JavaScript challenge and the « continuer vos achats » captcha.
+	'gokuProps',
+	'/errors/validateCaptcha',
 ]
 
-function isChallengePage(body: string): boolean {
+/** Exported for tests. */
+export function isChallengePage(body: string): boolean {
 	if (body.length > 200_000) return false
 	return CHALLENGE_MARKERS.some((m) => body.includes(m))
 }

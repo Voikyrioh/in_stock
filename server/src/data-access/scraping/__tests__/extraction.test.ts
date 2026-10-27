@@ -1,6 +1,8 @@
 import { expect } from 'chai'
 import {
 	ALTERNATE_SEARCH,
+	CYBERTEK_SEARCH,
+	GROSBILL_SEARCH,
 	ITEMLIST_SEARCH,
 	LDLC_PRODUCT,
 	LDLC_SEARCH,
@@ -13,6 +15,7 @@ import {
 } from '../../../__tests__/support/fixtures'
 import { extractListing } from '../extract/listing'
 import { extractProduct, isProduct } from '../extract/product-page'
+import { isChallengePage } from '../http-client'
 import { SHOPS } from '../shops/definitions'
 
 const shop = (id: string) => SHOPS.find((s) => s.id === id) as (typeof SHOPS)[number]
@@ -149,6 +152,43 @@ describe('Search page extraction', () => {
 		])
 	})
 
+	it('should read Cybertek and Grosbill cards (slug-id product pages)', () => {
+		for (const id of ['cybertek', 'grosbill']) {
+			const host = shop(id).hosts[0]
+			const { offers } = extractListing(CYBERTEK_SEARCH, ctx(id, `https://${host}/recherche?q=rtx`))
+			expect(
+				offers.map((o) => [o.url, o.title, o.priceCents, o.stock]),
+				id,
+			).to.deep.equal([
+				[
+					`https://${host}/pny-rtx-5080-16gb-argb-overclocked-triple-fan-150243`,
+					'PNY RTX 5080 16GB ARGB Overclocked Triple Fan',
+					224999,
+					'in_stock',
+				],
+				[
+					`https://${host}/nvidia-rtx-pro-6000-blackwell-max-q-96go-155661`,
+					'NVidia RTX PRO 6000 Blackwell Max-Q 96Go - Retail',
+					1500000,
+					'out_of_stock',
+				],
+			])
+		}
+	})
+
+	it('should read the web stock of Grosbill rows, not the store one', () => {
+		const { offers, strategy } = extractListing(
+			GROSBILL_SEARCH,
+			ctx('grosbill', 'https://www.grosbill.com/recherche?q=rtx'),
+		)
+		expect(strategy).to.equal('selectors')
+		expect(offers.map((o) => [o.title, o.priceCents, o.stock])).to.deep.equal([
+			['PNY Nvidia GeForce RTX 5060 Ti 8G OC', 60999, 'in_stock'],
+			['NVidia RTX PRO 6000 Blackwell Max-Q 96Go - Bulk', 2345000, 'out_of_stock'],
+		])
+		expect(offers[0]?.imageUrl).to.equal('https://www.grosbill.com/media/produits/s/ff87.webp')
+	})
+
 	it('should cap the offers per shop (BR-SEARCH-004)', () => {
 		const many = `<ul>${Array.from({ length: 15 }, (_, i) => `<li class="pdt-item"><h3 class="title-3"><a href="/fiche/PB${1000 + i}.html">Produit numéro ${i}</a></h3></li>`).join('')}</ul>`
 		expect(
@@ -167,5 +207,30 @@ describe('Shop definitions', () => {
 			expect(url.protocol).to.equal('https:')
 			expect(url.toString()).to.not.include(' ')
 		}
+	})
+
+	it('should tell Grosbill and Cybertek product pages from their categories', () => {
+		for (const id of ['grosbill', 'cybertek']) {
+			const { productUrlPattern: pattern, hosts } = shop(id)
+			const at = (path: string) => `https://${hosts[0]}${path}`
+			expect(pattern.test(at('/pny-rtx-5060-8gb-overclocked-dual-fan-153530')), id).to.equal(true)
+			expect(
+				pattern.test(at('/pny-rtx-5060-8gb-overclocked-dual-fan-153530#click-collect')),
+			).to.equal(true)
+			expect(pattern.test(at('/carte-graphique-6')), id).to.equal(false)
+			expect(pattern.test(at('/pc-fixe-106/gamer')), id).to.equal(false)
+			expect(pattern.test(at('/recherche?q=rtx%204070')), id).to.equal(false)
+		}
+	})
+})
+
+describe('Anti-robot pages', () => {
+	it('should recognise the Amazon challenge pages and leave real pages alone', () => {
+		const waf =
+			'<html><head><script>window.gokuProps = {"key":"x"}</script></head><body></body></html>'
+		const captcha = '<form method="get" action="/errors/validateCaptcha"><input name="amzn"></form>'
+		expect(isChallengePage(waf)).to.equal(true)
+		expect(isChallengePage(captcha)).to.equal(true)
+		expect(isChallengePage(LDLC_SEARCH)).to.equal(false)
 	})
 })

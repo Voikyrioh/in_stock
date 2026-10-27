@@ -47,3 +47,21 @@ nombre d'offres listées, 5 premières offres (prix, stock, titre, lien), ou l'�
 ## 4. Désactiver une boutique sans release
 
 Fiche infra `apps/in-stock.yml` → `env.DISABLED_SHOPS: "amazon,cdiscount"` → re-provision + redéploiement.
+
+## 5. Dernier état connu (sonde du 27/10/2026, workflow « Probe shops », « rtx 4070 »)
+
+Depuis un runner GitHub (adresse de centre de données, donc plus souvent bloquée que le serveur).
+La sonde affiche aussi la structure des cartes produit et les formulaires de recherche de l'accueil.
+
+| Boutique | Résultat | Remarque |
+|---|---|---|
+| Materiel.net | links, 10 | la recherche redirige vers une fiche quand le terme est précis |
+| TopAchat | links, 10 | recherche `/search/<q>` (l'ancienne `recherche.php` renvoie à l'accueil) |
+| Grosbill | selectors, 10 | plateforme commune avec Cybertek, `/recherche?q=`, stock web `.dw-status` |
+| Cybertek | selectors, 10 | `/recherche?q=`, cartes `article.card` |
+| Rue du Commerce | links, 10 | plateforme du groupe LDLC, `/recherche/<q>/` |
+| Alternate | selectors, 2 | peu de résultats pour ce terme |
+| LDLC | 0 depuis GitHub | 10 en production : la page servie au runner n'a pas de résultats |
+| Infomax | blocked depuis GitHub | 10 en production |
+| Amazon, Cdiscount | blocked | anti-robot, pas de contournement |
+| Boulanger (400), Darty, Fnac (403) | http | refus du robot dès robots.txt |

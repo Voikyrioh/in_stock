@@ -90,3 +90,25 @@ export const LINKS_ONLY_SEARCH = `<html><body><main>
  <a href="/ref/1189322">WD Red Plus 8 To 5640 tr/min</a>
  <a href="/aide/livraison">Livraison</a>
 </main></body></html>`
+
+/** Cybertek / Grosbill platform (2026), shape taken from the STK-15 probe. */
+export const CYBERTEK_SEARCH = `<html><body><div class="listing-results"><div class="grid grid--plp">
+<article class="card" data-gsl-pid="150243"><div class="card-img"><a class="card-img-link" href="/pny-rtx-5080-16gb-argb-overclocked-triple-fan-150243" tabindex="-1" aria-hidden="true"><img src="/media/produits/m/eeee.webp" alt="PNY RTX 5080 16GB ARGB Overclocked Triple Fan"></a></div>
+<div class="card-body"><div class="card-brandline"><div class="card-brand">PNY</div><a class="card-tp" href="/pny-rtx-5080-16gb-argb-overclocked-triple-fan-150243#avis" aria-label="Note 5,0 sur 5, 1 avis"><span class="card-tp__val">5,0</span><span class="card-tp__n">(1)</span></a></div>
+<a class="card-name" href="/pny-rtx-5080-16gb-argb-overclocked-triple-fan-150243">PNY RTX 5080 16GB ARGB Overclocked Triple Fan</a>
+<div class="card-price" data-price="2249.99"><span class="price">2 249,99 €</span></div><div class="card-installment"> ou 3× 750,00 € sans frais </div><div class="card-stock">En stock</div></div></article>
+<article class="card" data-gsl-pid="155661"><div class="card-img"><a class="card-img-link" href="/nvidia-rtx-pro-6000-blackwell-max-q-96go-155661"><span class="card-noimg-txt">Pas d'image disponible</span></a></div>
+<div class="card-body"><div class="card-brand">NVidia</div><a class="card-name" href="/nvidia-rtx-pro-6000-blackwell-max-q-96go-155661">NVidia RTX PRO 6000 Blackwell Max-Q 96Go - Retail</a>
+<div class="card-price" data-price="15000"><span class="price">15 000,00 €</span></div><div class="card-stock">Rupture de stock</div></div></article>
+<a href="/carte-graphique-6">Cartes graphiques</a></div></div></body></html>`
+
+/** Grosbill result row (STK-15 probe): web stock and store stock side by side. */
+export const GROSBILL_SEARCH = `<html><body><div class="product-list">
+<article class="product-row product-row--gb"><div class="pimg-zone"><a href="/pny-nvidia-geforce-rtx-5060-ti-8g-oc-155321" tabindex="-1" aria-hidden="true"><img src="/media/produits/s/ff87.webp" alt="PNY Nvidia GeForce RTX 5060 Ti 8G OC"></a></div>
+<div class="pinfo-zone"><a href="/pny-nvidia-geforce-rtx-5060-ti-8g-oc-155321" class="p-name">PNY Nvidia GeForce RTX 5060 Ti 8G OC</a></div>
+<div class="dispo-zone"><div class="dispo-stack"><div class="dw-block dw-block--in"><span class="dw-label">Web</span> <span class="dw-status dw-in">En stock</span></div><div class="ds-block"><span class="ds-label">Magasins</span><div class="store-item"><span class="store-name store-name--out">Non dispo en magasin</span></div></div></div></div>
+<div class="price-zone" data-price="609.99"><div class="price-main prow-gb-price">609,99 €</div></div></article>
+<article class="product-row product-row--gb"><div class="pinfo-zone"><a href="/nvidia-rtx-pro-6000-blackwell-max-q-96go-155813" class="p-name">NVidia RTX PRO 6000 Blackwell Max-Q 96Go - Bulk</a></div>
+<div class="dispo-zone"><div class="dw-block dw-block--out"><span class="dw-label">Web</span> <span class="dw-status dw-out">Rupture</span></div><div class="ds-block"><span class="ds-label">Magasins</span><a class="store-name store-link" href="/nvidia-rtx-pro-6000-blackwell-max-q-96go-155813#click-collect">1 magasin</a></div></div>
+<div class="price-zone" data-price="23450"><div class="price-main prow-gb-price">23 450,00 €</div></div></article>
+</div></body></html>`

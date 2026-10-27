@@ -74,10 +74,13 @@ function dedupe(offers: ListedOffer[], limit: number): ListedOffer[] {
 	for (const offer of offers) {
 		const key = normaliseOfferUrl(offer.url)
 		const known = seen.get(key)
-		if (!known) seen.set(key, { ...offer, url: key })
-		else if (known.priceCents === null && offer.priceCents !== null)
+		if (!known) {
+			if (seen.size >= limit) break
 			seen.set(key, { ...offer, url: key })
-		if (seen.size >= limit) break
+			continue
+		}
+		if (known.priceCents === null && offer.priceCents !== null)
+			seen.set(key, { ...offer, url: key })
 	}
 	return [...seen.values()]
 }
@@ -135,7 +138,10 @@ function fromSelectors($: CheerioAPI, ctx: ListingContext): ListedOffer[] {
 			title,
 			priceCents: parsePrice(priceText),
 			currency: parseCurrency(priceText),
-			stock: selectors.stock ? stockFromCard(card.find(selectors.stock).first()) : 'unknown',
+			// No stock selector: the card's own wording ("En stock", "Rupture de stock").
+			stock: selectors.stock
+				? stockFromCard(card.find(selectors.stock).first())
+				: stockFromText(cleanText(card.html())),
 			imageUrl: imageOf(card.find(selectors.image ?? 'img').first(), ctx.pageUrl),
 		})
 	})
@@ -167,6 +173,8 @@ function imageOf(img: Cheerio<AnyNode>, base: string): string | null {
 
 const PRICE_IN_TEXT = /\d[\d   .]*(?:[,.]\d{2})?\s*€(?:\s*\d{2})?|€\s*\d[\d .,]*/
 
+const PICTURE_CLASS = /img|image|picture|photo|visuel|vignette/i
+
 /** Last resort: links to product pages, with price and stock read in their nearest card. */
 function fromLinks($: CheerioAPI, ctx: ListingContext): ListedOffer[] {
 	const offers: ListedOffer[] = []
@@ -174,8 +182,15 @@ function fromLinks($: CheerioAPI, ctx: ListingContext): ListedOffer[] {
 		const link = $(el)
 		const url = absoluteUrl(link.attr('href'), ctx.pageUrl)
 		if (!url || !belongsToShop(url, ctx)) return
-		const title =
-			cleanText(link.attr('title') ?? link.text()) ?? cleanText(link.find('img').attr('alt'))
+		// Picture link of a card (or its "Pas d'image disponible" placeholder): only the picture names the product.
+		const picture =
+			link.attr('aria-hidden') === 'true' ||
+			link.attr('tabindex') === '-1' ||
+			link.find('img').length > 0 ||
+			PICTURE_CLASS.test(`${link.attr('class') ?? ''} ${link.find('[class]').attr('class') ?? ''}`)
+		const title = picture
+			? cleanText(link.find('img').attr('alt'))
+			: (cleanText(link.attr('title') ?? link.text()) ?? cleanText(link.find('img').attr('alt')))
 		if (!title || title.length < 8) return
 		const card = nearestCard($, el)
 		const text = cleanText(card?.html()) ?? ''
