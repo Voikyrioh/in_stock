@@ -1,0 +1,8 @@
+{
+	"require": ["tsx", "src/__tests__/setup.ts"],
+	"extensions": ["ts"],
+	"spec": "src/**/__tests__/**/*.test.ts",
+	"timeout": 10000,
+	"reporter": "spec",
+	"exit": true
+}
