@@ -1,21 +1,30 @@
 {
-  "name": "in_stock",
-  "version": "1.0.0",
-  "description": "check item in stock on websites",
-  "main": "index.js",
-  "scripts": {
-    "build": "tsc index.ts --outDir build/",
-    "dev": "node build/index.js ",
-    "test": "echo \"Error: no test specified\" && exit 1"
-  },
-  "author": "Voikyrioh",
-  "license": "ISC",
-  "devDependencies": {
-    "@types/node": "^22.13.10"
-  },
-  "dependencies": {
-    "fastify": "^5.2.1",
-    "htmlparser2": "^10.0.0",
-    "typescript": "^5.8.2"
-  }
+	"name": "in-stock",
+	"version": "1.0.0",
+	"private": true,
+	"type": "module",
+	"description": "In Stock : chercher un produit informatique dans toutes les boutiques en ligne, voir son stock et son prix, le suivre (Hono + Vue)",
+	"author": "Voikyrioh",
+	"license": "UNLICENSED",
+	"workspaces": [
+		"shared",
+		"server",
+		"web"
+	],
+	"engines": {
+		"node": ">=22"
+	},
+	"scripts": {
+		"dev": "npm run dev -w server & npm run dev -w web",
+		"build": "npm run build -w web && npm run build -w server",
+		"typecheck": "npm run typecheck --workspaces --if-present",
+		"lint": "biome check .",
+		"format": "biome check --write .",
+		"test": "npm test --workspaces --if-present",
+		"probe": "npm run probe -w server --"
+	},
+	"devDependencies": {
+		"@biomejs/biome": "2.5.15",
+		"typescript": "~5.9.3"
+	}
 }

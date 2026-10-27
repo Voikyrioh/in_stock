@@ -1,0 +1,30 @@
+# Release: builds the image, pushes it to GHCR, creates the vX.Y.Z tag and the
+# GitHub release (reusable workflow of voikyrioh/workflows). Manual trigger.
+# Deployment is a separate step: run the infra repo workflow deploy-version.yml
+# with app_name=in-stock and the new tag.
+name: Release
+
+on:
+  workflow_dispatch:
+    inputs:
+      bump_type:
+        description: "Type de release"
+        type: choice
+        options:
+          - patch
+          - minor
+          - major
+        default: patch
+
+permissions:
+  contents: write
+  packages: write
+
+jobs:
+  release:
+    uses: voikyrioh/workflows/.github/workflows/ci-release.yml@main
+    with:
+      # image name on GHCR = `name` of apps/in-stock.yml in the infra repo
+      app_name: in-stock
+      bump_type: ${{ inputs.bump_type }}
+    secrets: inherit
